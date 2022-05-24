@@ -31,7 +31,7 @@
   (and (= 3 (op-code state))
        (empty? input)))
 
-(def wait-or-halt (some-fn input-wait? halt?))
+(def wait-or-halt? (some-fn input-wait? halt?))
 
 (defn assoc-input [state input]
   (assoc state :input input))
@@ -128,10 +128,11 @@
 
 (defmethod interpret 99 [state] state)
 
-(defn interpret-till [pred state]
-  (->> (iterate interpret state)
-       (filter pred)
-       (first)))
+(defn interpret-till
+  ([pred state]
+   (interpret-till interpret pred state))
+  ([f pred state]
+   (first (filter pred (iterate f state)))))
 
 (defn parse-to-program [input]
   (->> (str/split input #",")

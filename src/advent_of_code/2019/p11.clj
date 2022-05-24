@@ -20,11 +20,6 @@
 
 (defrecord RobotState [grid position direction program-state])
 
-(defn hide-program [state]
-  (-> state
-      (update :program-state intcode/hide-program)
-      (assoc :grid {:grid :hidden})))
-
 (defn color [{:keys [grid position]}]
   (get grid position 0))
 
@@ -47,7 +42,7 @@
 
 (defn interpret [{:keys [program-state] :as state}]
   (let [program-state* (->> (intcode/assoc-input program-state [(color state)])
-                            (intcode/interpret-till intcode/wait-or-halt))
+                            (intcode/interpret-till intcode/wait-or-halt?))
         state          (assoc state :program-state program-state*)]
     (if (intcode/halt? program-state*)
       state
@@ -86,12 +81,6 @@
        (:grid)
        (visualize-grid)))
 
-(defn -main [args]
-  (->> (intcode/->ProgramState 0 0 [] [] (intcode/parse-to-program args))
-       (->RobotState {} [0 0] :up)
-       (interpret)
-       (hide-program)))
-
 (deftest requirements
   (testing "requirements"
     (is (= 1747 (part-1 input)))
@@ -102,9 +91,3 @@
             ".#....#..#.#..#.#.#..#..#.#.#..#....#..#..."
             ".####..##...###.#..#.#..#.#..#.####.###...."]
            (part-2 input)))))
-
-(comment
-  (-main input)
-
-  (hide-program (part-1 input))
-  (run! prn (part-2 input)))
